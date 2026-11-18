@@ -1,0 +1,39 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and Release
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Zig
+        uses: mlugg/setup-zig@v1
+        with:
+          version: 0.14.0
+
+      - name: Run tests
+        run: zig build test
+
+      - name: Build x32 and x64 plugins
+        run: zig build -Doptimize=ReleaseSafe --prefix dist
+
+      - name: Package zip
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"
+          Compress-Archive -Path "dist\*" -DestinationPath "x64dbg-MCP-Server-$tag.zip" -Force
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: x64dbg-MCP-Server-${{ github.ref_name }}.zip
+          generate_release_notes: true
