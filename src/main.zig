@@ -164,6 +164,9 @@ export fn plugsetup(setupStruct: *bridge.PLUG_SETUPSTRUCT) callconv(.c) void {
     } else {
         bridge.logPuts("[x64dbg-MCP Server] Auto-start disabled. Use menu to start.\x00");
     }
+
+    // sync menu status
+    rebuildMenu();
 }
 
 export fn plugstop() callconv(.c) c_int {
@@ -207,6 +210,7 @@ fn rebuildMenu() void {
     setEntryIcon(MENU_CONFIG, icons.settings_icon);
     _ = bridge._plugin_menuaddseparator(main_menu);
     _ = bridge._plugin_menuaddentry(main_menu, MENU_ABOUT, "&About...\x00");
+    setEntryIcon(MENU_ABOUT, icons.info_icon);
 }
 
 fn setMenuIcon(menu: c_int, data: []const u8) void {
